@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Low Pass Filter · Embedded Systems · ECE Learning</title>
+    <style>
+        /* ---------- GLOBAL & TYPOGRAPHY ---------- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: #f4f7fb;
+            color: #1e2b3c;
+            line-height: 1.6;
+            padding: 20px 10px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 15px 40px rgba(0, 20, 30, 0.12);
+            padding: 30px 30px 40px;
+            border: 1px solid #d9e2ec;
+        }
+        /* ---------- HEADER ---------- */
+        header {
+            background: linear-gradient(145deg, #0a2a44, #1b4a6b);
+            color: white;
+            border-radius: 20px;
+            padding: 30px 30px 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 18px rgba(0,20,30,0.2);
+        }
+        header h1 {
+            font-size: 2.3rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+        header h1 span {
+            background: #f7c948;
+            color: #0a2a44;
+            font-size: 1.1rem;
+            font-weight: 700;
+            padding: 4px 14px;
+            border-radius: 30px;
+            margin-left: 12px;
+            vertical-align: middle;
+        }
+        header .subhead {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 16px;
+            border-left: 5px solid #f7c948;
+            padding-left: 18px;
+        }
+        header .objectives {
+            background: rgba(255,255,255,0.1);
+            padding: 15px 20px;
+            border-radius: 16px;
+            margin-top: 20px;
+            font-size: 0.98rem;
+        }
+        header .objectives strong {
+            color: #f7c948;
+        }
+        header .objectives ul {
+            margin-left: 20px;
+            margin-top: 6px;
+        }
+        /* ---------- NAVIGATION ---------- */
+        nav {
+            background: #e8edf5;
+            padding: 12px 20px;
+            border-radius: 40px;
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 14px;
+            justify-content: center;
+        }
+        nav a {
+            text-decoration: none;
+            color: #1b4a6b;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 30px;
+            transition: all 0.15s;
+            font-size: 0.95rem;
+        }
+        nav a:hover {
+            background: #1b4a6b;
+            color: white;
+        }
+        /* ---------- SECTIONS ---------- */
+        section {
+            margin-bottom: 45px;
+            scroll-margin-top: 20px;
+        }
+        h2 {
+            font-size: 1.9rem;
+            font-weight: 600;
+            color: #0a2a44;
+            border-bottom: 4px solid #f7c948;
+            display: inline-block;
+            padding-bottom: 8px;
+            margin-bottom: 25px;
+        }
+        h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #1b4a6b;
+            margin: 25px 0 12px;
+        }
+        h4 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #1e3e5c;
+            margin: 18px 0 8px;
+        }
+        p, li {
+            color: #1e2b3c;
+        }
+        /* ---------- CARDS & TABLES ---------- */
+        .card {
+            background: #f9fcff;
+            border: 1px solid #d0dfec;
+            border-radius: 20px;
+            padding: 22px 25px;
+            margin: 20px 0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 18px 0;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        th {
+            background: #1b4a6b;
+            color: white;
+            font-weight: 600;
+            padding: 12px 12px;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #d9e2ec;
+            background: white;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        /* ---------- EQUATIONS ---------- */
+        .eq {
+            font-family: 'Courier New', 'Consolas', monospace;
+            background: #edf2f9;
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            display: inline-block;
+            margin: 8px 0;
+            border-left: 6px solid #f7c948;
+        }
+        .eq-block {
+            background: #f2f7fe;
+            padding: 18px 22px;
+            border-radius: 16px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 1.05rem;
+            border: 1px solid #cbdae9;
+        }
+        /* ---------- SVG DIAGRAMS ---------- */
+        .svg-wrap {
+            background: #ffffff;
+            border: 1px solid #cfddee;
+            border-radius: 20px;
+            padding: 15px;
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            overflow-x: auto;
+        }
+        svg {
+            max-width: 100%;
+            height: auto;
+        }
+        .figcaption {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #3e5e7a;
+            margin-top: 6px;
+            font-style: italic;
+        }
+        /* ---------- QUIZ / INTERACTIVE ---------- */
+        .quiz-question {
+            background: #f9fcff;
+            border-left: 8px solid #1b4a6b;
+            padding: 18px 22px;
+            border-radius: 14px;
+            margin: 20px 0;
+        }
+        .quiz-question p {
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        .option {
+            display: block;
+            margin: 8px 0;
+            padding: 6px 12px;
+            border-radius: 30px;
+            transition: background 0.1s;
+            cursor: pointer;
+        }
+        .option:hover {
+            background: #e1ecf9;
+        }
+        input[type="radio"] {
+            margin-right: 12px;
+            transform: scale(1.1);
+            accent-color: #1b4a6b;
+        }
+        .btn {
+            background: #1b4a6b;
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.15s;
+            margin: 10px 10px 10px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .btn:hover {
+            background: #0a2a44;
+            transform: translateY(-2px);
+        }
+        .btn.reset {
+            background: #5d7e9c;
+        }
+        .btn.reset:hover {
+            background: #3e5e7a;
+        }
+        .feedback {
+            margin-top: 12px;
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        .correct-fb {
+            background: #d4edda;
+            color: #0a4b1e;
+            border-left: 6px solid #2e7d32;
+        }
+        .wrong-fb {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 6px solid #c62828;
+        }
+        .unanswered-fb {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 6px solid #f7c948;
+        }
+        .score-box {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 20px 0;
+            padding: 16px 22px;
+            background: #e8edf5;
+            border-radius: 16px;
+            display: inline-block;
+        }
+        /* ---------- EXPANDABLE INTERVIEW ---------- */
+        details {
+            background: #f2f7fe;
+            border-radius: 14px;
+            padding: 12px 18px;
+            margin: 12px 0;
+            border: 1px solid #cbdae9;
+            cursor: pointer;
+        }
+        details summary {
+            font-weight: 600;
+            color: #0a2a44;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+        }
+        details summary::after {
+            content: "▼";
+            font-size: 0.8rem;
+            color: #1b4a6b;
+        }
+        details[open] summary::after {
+            content: "▲";
+        }
+        details p {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px dashed #b8cde0;
+        }
+        /* ---------- PRINT ---------- */
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; border: none; padding: 10px; }
+            nav, .btn, .reset, .quiz input[type="radio"] { display: none; }
+            header { background: #0a2a44; color: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .card, .quiz-question { break-inside: avoid; }
+        }
+        /* ---------- RESPONSIVE ---------- */
+        @media (max-width: 700px) {
+            header h1 { font-size: 1.6rem; }
+            .container { padding: 18px; }
+            h2 { font-size: 1.5rem; }
+            .svg-wrap { padding: 5px; }
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #d9e2ec;
+            color: #5a7a99;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- ========== HEADER ========== -->
+    <header>
+        <h1>Low Pass Filter <span>Embedded Systems</span></h1>
+        <div class="subhead">Unit: Embedded System Development · Subject: Valgrind for Memory Analysis</div>
+        <div class="objectives">
+            <strong>🎯 Learning Objectives</strong>
+            <ul>
+                <li>Understand the fundamental operation and frequency response of a first‑order RC low pass filter.</li>
+                <li>Derive the transfer function, cut‑off frequency, and phase response.</li>
+                <li>Analyse DC and AC behaviour, and interpret Bode plots.</li>
+                <li>Apply design equations to solve numerical problems (GATE &amp; interview level).</li>
+                <li>Recognise practical applications in embedded systems signal conditioning.</li>
+                <li>Relate simulation results (Multisim) to theoretical predictions.</li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- ========== NAVIGATION ========== -->
+    <nav>
+        <a href="#intro">Introduction</a>
+        <a href="#circuit">Circuit</a>
+        <a href="#working">Working</a>
+        <a href="#waveforms">Waveforms</a>
+        <a href="#equations">Equations</a>
+        <a href="#solved">Solved</a>
+        <a href="#gate">GATE</a>
+        <a href="#interview">Interview</a>
+        <a href="#applications">Applications</a>
+        <a href="#quiz">Quiz</a>
+        <a href="#revision">Revision</a>
+    </nav>
+
+    <!-- ========== 1. INTRODUCTION ========== -->
+    <section id="intro">
+        <h2>1. Introduction &amp; Fundamentals</h2>
+        <div class="card">
+            <p><strong>Definition:</strong> A <strong>low pass filter (LPF)</strong> is a circuit that passes low‑frequency signals from DC up to a cut‑off frequency <em>f<sub>c</sub></em> while attenuating higher frequencies. In embedded systems, LPFs are used for anti‑aliasing, noise reduction, and sensor signal conditioning.</p>
+            <p><strong>Operating principle:</strong> A first‑order RC LPF uses a resistor and capacitor. The capacitor’s reactance <em>X<sub>C</sub> = 1/(2πfC)</em> decreases with frequency, effectively short‑circuiting high‑frequency components to ground, while low frequencies pass with minimal attenuation.</p>
+            <p><strong>Importance in ECE:</strong> LPFs are ubiquitous in analog and mixed‑signal design, communication receivers, power supplies, and embedded sensor interfaces. They form the building block for more complex active filters.</p>
+            <p><strong>Prerequisites:</strong> Basic circuit laws (KVL/KCL), phasors, complex impedance, transfer functions, and decibel notation.</p>
+            <p><strong>Key terminology:</strong> Cut‑off frequency (−3 dB point), passband, stopband, roll‑off (−20 dB/decade), time constant (τ = RC), phase shift.</p>
+        </div>
+    </section>
+
+    <!-- ========== 2. CIRCUIT DIAGRAM ========== -->
+    <section id="circuit">
+        <h2>2. Circuit Diagram &amp; Component Role</h2>
+        <div class="svg-wrap">
+            <svg width="600" height="230" viewBox="0 0 600 230" xmlns="http://www.w3.org/2000/svg">
+                <!-- Input -->
+                <text x="30" y="80" font-family="Segoe UI" font-size="16" fill="#0a2a44">V<tspan baseline-shift="sub" font-size="12">in</tspan></text>
+                <circle cx="70" cy="75" r="4" fill="#1b4a6b"/>
+                <line x1="74" y1="75" x2="130" y2="75" stroke="#1b4a6b" stroke-width="2.5"/>
+                <!-- Resistor zigzag -->
+                <polyline points="130,75 145,55 160,95 175,55 190,95 205,55 220,75" stroke="#0a2a44" stroke-width="2.5" fill="none"/>
+                <text x="160" y="45" font-family="Segoe UI" font-size="15" fill="#0a2a44">R</text>
+                <!-- Output node -->
+                <line x1="220" y1="75" x2="300" y2="75" stroke="#1b4a6b" stroke-width="2.5"/>
+                <circle cx="300" cy="75" r="4" fill="#1b4a6b"/>
+                <text x="310" y="70" font-family="Segoe UI" font-size="16" fill="#0a2a44">V<tspan baseline-shift="sub" font-size="12">out</tspan></text>
+                <!-- Capacitor -->
+                <line x1="300" y1="75" x2="300" y2="115" stroke="#1b4a6b" stroke-width="2.5"/>
+                <line x1="280" y1="115" x2="320" y2="115" stroke="#0a2a44" stroke-width="2.5"/>
+                <line x1="280" y1="130" x2="320" y2="130" stroke="#0a2a44" stroke-width="2.5"/>
+                <line x1="300" y1="130" x2="300" y2="160" stroke="#1b4a6b" stroke-width="2.5"/>
+                <text x="325" y="128" font-family="Segoe UI" font-size="15" fill="#0a2a44">C</text>
+                <!-- Ground -->
+                <line x1="300" y1="160" x2="300" y2="175" stroke="#1b4a6b" stroke-width="2.5"/>
+                <line x1="285" y1="175" x2="315" y2="175" stroke="#0a2a44" stroke-width="2.5"/>
+                <line x1="292" y1="183" x2="308" y2="183" stroke="#0a2a44" stroke-width="2.5"/>
+                <line x1="298" y1="191" x2="302" y2="191" stroke="#0a2a44" stroke-width="2.5"/>
+                <!-- Input ground -->
+                <line x1="70" y1="75" x2="70" y2="160" stroke="#1b4a6b" stroke-width="2.5"/>
+                <line x1="70" y1="160" x2="300" y2="160" stroke="#1b4a6b" stroke-width="2.5"/>
+                <!-- GND symbol at input -->
+                <line x1="70" y1="160" x2="70" y2="175" stroke="#1b4a6b" stroke-width="2.5"/>
+                <line x1="55" y1="175" x2="85" y2="175" stroke="#0a2a44" stroke-width="2.5"/>
+                <line x1="62" y1="183" x2="78" y2="183" stroke="#0a2a44" stroke-width="2.5"/>
+                <line x1="68" y1="191" x2="72" y2="191" stroke="#0a2a44" stroke-width="2.5"/>
+                <text x="40" y="200" font-family="Segoe UI" font-size="14" fill="#0a2a44">GND</text>
+            </svg>
+        </div>
+        <div class="figcaption">Fig 1. First‑order RC low pass filter (passive). Component values chosen by design.</div>
+        <table>
+            <tr><th>Component</th><th>Function</th></tr>
+            <tr><td>Resistor (R)</td><td>Limits current and, together with C, sets the cut‑off frequency. Also provides a path for the input signal.</td></tr>
+            <tr><td>Capacitor (C)</td><td>Shunts high‑frequency signals to ground; stores charge and introduces a frequency‑dependent reactance.</td></tr>
+        </table>
+    </section>
+
+    <!-- ========== 3. WORKING PRINCIPLE ========== -->
+    <section id="working">
+        <h2>3. Working Principle &amp; Detailed Explanation</h2>
+        <div class="card">
+            <h3>DC Behaviour (f = 0)</h3>
+            <p>At DC, the capacitor behaves as an open circuit. No current flows through C, so no voltage drop across R (assuming no load). Therefore <em>V<sub>out</sub> = V<sub>in</sub></em>; the filter passes DC unchanged.</p>
+            <h3>AC Behaviour (f &gt; 0)</h3>
+            <p>As frequency increases, the capacitive reactance <em>X<sub>C</sub> = 1/(ωC)</em> decreases. The capacitor increasingly shunts the signal to ground, reducing the output amplitude. At very high frequencies, <em>X<sub>C</sub> → 0</em>, so <em>V<sub>out</sub> → 0</em>.</p>
+            <h3>Cut‑off frequency</h3>
+            <p>Defined as the frequency where <em>|V<sub>out</sub>| = V<sub>in</sub>/√2</em> (−3 dB) and the phase shift is −45°. For the RC LPF:</p>
+            <div class="eq">f<sub>c</sub> = 1 / (2π R C)</div>
+            <p><strong>Time constant:</strong> τ = RC. Also, f<sub>c</sub> = 1/(2πτ).</p>
+            <h3>Role of components</h3>
+            <p>R and C form a frequency‑dependent voltage divider. The output is taken across C. At low frequencies, C has high impedance → most voltage appears across C. At high frequencies, C has low impedance → output is shorted.</p>
+            <h3>Advantages &amp; limitations</h3>
+            <p><strong>Advantages:</strong> Simple, passive, low cost, no power supply. <strong>Limitations:</strong> Gentle roll‑off (−20 dB/decade), loading effects, no gain.</p>
+            <h3>Common misconceptions</h3>
+            <ul>
+                <li>“The capacitor blocks DC” – false; it blocks <em>changes</em> in voltage, but steady DC passes (after transient).</li>
+                <li>“Output is zero at high frequency” – practically, parasitic elements cause a small feedthrough.</li>
+                <li>“Cut‑off is where gain is 0.707 of maximum” – correct only for first‑order filters.</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- ========== 4. WAVEFORMS & SIMULATION ========== -->
+    <section id="waveforms">
+        <h2>4. Waveforms &amp; Simulation Output</h2>
+        <div class="svg-wrap">
+            <svg width="700" height="300" viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg">
+                <!-- Frequency response (Bode magnitude) sketch -->
+                <text x="20" y="30" font-family="Segoe UI" font-size="16" font-weight="600" fill="#0a2a44">Bode magnitude (illustrative)</text>
+                <!-- axes -->
+                <line x1="70" y1="240" x2="600" y2="240" stroke="#1e2b3c" stroke-width="2"/>
+                <line x1="70" y1="240" x2="70" y2="50" stroke="#1e2b3c" stroke-width="2"/>
+                <text x="620" y="245" font-size="14" fill="#1e2b3c">log f</text>
+                <text x="15" y="40" font-size="14" fill="#1e2b3c">|H| (dB)</text>
+                <!-- passband line -->
+                <line x1="70" y1="70" x2="280" y2="70" stroke="#1b4a6b" stroke-width="3"/>
+                <!-- rolloff -->
+                <line x1="280" y1="70" x2="520" y2="190" stroke="#1b4a6b" stroke-width="3"/>
+                <!-- -3dB point -->
+                <line x1="280" y1="70" x2="280" y2="95" stroke="#c62828" stroke-width="1.5" stroke-dasharray="5,3"/>
+                <text x="265" y="112" font-size="13" fill="#c62828">−3 dB</text>
+                <text x="260" y="260" font-size="13" fill="#1b4a6b">f<tspan baseline-shift="sub" font-size="11">c</tspan></text>
+                <!-- labels -->
+                <text x="100" y="60" font-size="13" fill="#1b4a6b">0 dB</text>
+                <text x="480" y="175" font-size="13" fill="#1b4a6b">−20 dB/dec</text>
+            </svg>
+        </div>
+        <div class="figcaption">Fig 2. Idealised frequency response (magnitude) of first‑order LPF.</div>
+        <div class="svg-wrap">
+            <svg width="700" height="200" viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg">
+                <!-- Phase response sketch -->
+                <text x="20" y="30" font-family="Segoe UI" font-size="16" font-weight="600" fill="#0a2a44">Phase response (illustrative)</text>
+                <line x1="70" y1="160" x2="600" y2="160" stroke="#1e2b3c" stroke-width="2"/>
+                <line x1="70" y1="160" x2="70" y2="50" stroke="#1e2b3c" stroke-width="2"/>
+                <text x="620" y="165" font-size="14">log f</text>
+                <text x="20" y="50" font-size="14">Phase (°)</text>
+                <!-- phase curve: 0 to -90 -->
+                <path d="M 70 70 L 200 70 Q 280 70 320 115 Q 400 160 500 160" stroke="#1b4a6b" stroke-width="3" fill="none"/>
+                <line x1="280" y1="70" x2="280" y2="120" stroke="#c62828" stroke-width="1.5" stroke-dasharray="5,3"/>
+                <text x="260" y="140" font-size="13" fill="#c62828">−45°</text>
+                <text x="250" y="185" font-size="13" fill="#1b4a6b">f<tspan baseline-shift="sub" font-size="11">c</tspan></text>
+            </svg>
+        </div>
+        <div class="figcaption">Fig 3. Phase shift vs frequency (first‑order LPF).</div>
+        <p><em>Note: No simulation screenshot was provided. The above plots are illustrative and match theoretical behaviour.</em></p>
+    </section>
+
+    <!-- ========== 5. EQUATIONS ========== -->
+    <section id="equations">
+        <h2>5. Mathematical Equations &amp; Derivations</h2>
+        <div class="eq-block">
+            <p><strong>Transfer function H(s):</strong></p>
+            <div class="eq">H(s) = V<sub>out</sub>(s) / V<sub>in</sub>(s) = (1/(sC)) / (R + 1/(sC)) = 1 / (1 + s R C)</div>
+            <p><strong>Magnitude and phase (s = jω):</strong></p>
+            <div class="eq">|H(jω)| = 1 / √(1 + (ωRC)²)</div>
+            <div class="eq">∠H(jω) = − arctan(ωRC)</div>
+            <p><strong>Cut‑off frequency (ω<sub>c</sub> = 1/RC):</strong></p>
+            <div class="eq">f<sub>c</sub> = 1 / (2π R C)</div>
+            <p><strong>At f = f<sub>c</sub> :</strong> |H| = 1/√2 ≈ 0.707 (−3 dB), phase = −45°.</p>
+            <p><strong>Roll‑off:</strong> −20 dB/decade for f ≫ f<sub>c</sub>.</p>
+            <p><strong>Time constant:</strong> τ = RC, step response: v<sub>out</sub>(t) = V<sub>in</sub>(1 − e<sup>−t/τ</sup>).</p>
+        </div>
+    </section>
+
+    <!-- ========== 6. SOLVED NUMERICALS ========== -->
+    <section id="solved">
+        <h2>6. Solved Numerical Problems</h2>
+        <div class="card">
+            <h4>Example 1 (Easy)</h4>
+            <p><strong>Q:</strong> An RC LPF has R = 10 kΩ, C = 10 nF. Find the cut‑off frequency.</p>
+            <p><strong>Solution:</strong> f<sub>c</sub> = 1/(2πRC) = 1/(2π × 10<sup>4</sup> × 10<sup>−8</sup>) = 1/(2π × 10<sup>−4</sup>) ≈ 1591.5 Hz.</p>
+            <p><strong>Interpretation:</strong> Signals above ~1.6 kHz are attenuated.</p>
+        </div>
+        <div class="card">
+            <h4>Example 2 (Moderate)</h4>
+            <p><strong>Q:</strong> For the above filter, find the output voltage magnitude at f = 5 kHz if input is 2 V peak.</p>
+            <p><strong>Solution:</strong> ω = 2π×5000 = 31416 rad/s. ωRC = 31416 × 10<sup>4</sup> × 10<sup>−8</sup> = 3.1416. |H| = 1/√(1+3.1416²) = 1/√(1+9.87) = 1/3.30 = 0.303. V<sub>out</sub> = 0.303×2 = 0.606 V peak.</p>
+            <p><strong>Interpretation:</strong> At 5 kHz, the signal is attenuated to ~30% of input.</p>
+        </div>
+        <div class="card">
+            <h4>Example 3 (GATE‑style, Difficult)</h4>
+            <p><strong>Q:</strong> A first‑order RC LPF has a −3 dB frequency of 2 kHz. If the resistor is 4.7 kΩ, determine the capacitor value and the attenuation (in dB) at 20 kHz.</p>
+            <p><strong>Solution:</strong> C = 1/(2π f<sub>c</sub> R) = 1/(2π×2000×4700) = 1/(5.9×10<sup>7</sup>) ≈ 16.9 nF. At 20 kHz: f/f<sub>c</sub> = 10. |H| = 1/√(1+100) ≈ 0.0995 → −20.04 dB.</p>
+            <p><strong>Interpretation:</strong> One decade above cut‑off, attenuation ≈ −20 dB as expected.</p>
+        </div>
+    </section>
+
+    <!-- ========== 7. GATE PREPARATION ========== -->
+    <section id="gate">
+        <h2>7. GATE Examination Preparation</h2>
+        <p><em>Original GATE‑style MCQs for practice (not previous‑year questions).</em></p>
+
+        <div class="quiz-question">
+            <p>1. (Easy) The −3 dB frequency of an RC low pass filter is 1 kHz. What is the phase shift at this frequency?</p>
+            <label class="option"><input type="radio" name="gate1" value="A"> A) 0°</label>
+            <label class="option"><input type="radio" name="gate1" value="B"> B) −45°</label>
+            <label class="option"><input type="radio" name="gate1" value="C"> C) −90°</label>
+            <label class="option"><input type="radio" name="gate1" value="D"> D) −180°</label>
+            <div class="feedback" id="fb-gate1"></div>
+        </div>
+        <div class="quiz-question">
+            <p>2. (Easy) At very high frequencies, the output of an ideal RC LPF approaches:</p>
+            <label class="option"><input type="radio" name="gate2" value="A"> A) V<sub>in</sub></label>
+            <label class="option"><input type="radio" name="gate2" value="B"> B) 0.707 V<sub>in</sub></label>
+            <label class="option"><input type="radio" name="gate2" value="C"> C) 0</label>
+            <label class="option"><input type="radio" name="gate2" value="D"> D) V<sub>in</sub>/2</label>
+            <div class="feedback" id="fb-gate2"></div>
+        </div>
+        <div class="quiz-question">
+            <p>3. (Moderate) A low pass filter has R = 1 kΩ and C = 100 nF. What is the time constant?</p>
+            <label class="option"><input type="radio" name="gate3" value="A"> A) 0.1 ms</label>
+            <label class="option"><input type="radio" name="gate3" value="B"> B) 1 ms</label>
+            <label class="option"><input type="radio" name="gate3" value="C"> C) 10 ms</label>
+            <label class="option"><input type="radio" name="gate3" value="D"> D) 0.01 ms</label>
+            <div class="feedback" id="fb-gate3"></div>
+        </div>
+        <div class="quiz-question">
+            <p>4. (Moderate) The roll‑off of a first‑order LPF is:</p>
+            <label class="option"><input type="radio" name="gate4" value="A"> A) −20 dB/octave</label>
+            <label class="option"><input type="radio" name="gate4" value="B"> B) −6 dB/octave</label>
+            <label class="option"><input type="radio" name="gate4" value="C"> C) −40 dB/decade</label>
+            <label class="option"><input type="radio" name="gate4" value="D"> D) −20 dB/decade</label>
+            <div class="feedback" id="fb-gate4"></div>
+        </div>
+        <div class="quiz-question">
+            <p>5. (Moderate) For an RC LPF, if R is doubled and C is halved, the cut‑off frequency:</p>
+            <label class="option"><input type="radio" name="gate5" value="A"> A) doubles</label>
+            <label class="option"><input type="radio" name="gate5" value="B"> B) halves</label>
+            <label class="option"><input type="radio" name="gate5" value="C"> C) remains the same</label>
+            <label class="option"><input type="radio" name="gate5" value="D"> D) quadruples</label>
+            <div class="feedback" id="fb-gate5"></div>
+        </div>
+        <div class="quiz-question">
+            <p>6. (Difficult) An input signal 5 sin(2π·1000t) is applied to an RC LPF with f<sub>c</sub> = 1 kHz. The output amplitude is approximately:</p>
+            <label class="option"><input type="radio" name="gate6" value="A"> A) 5 V</label>
+            <label class="option"><input type="radio" name="gate6" value="B"> B) 3.54 V</label>
+            <label class="option"><input type="radio" name="gate6" value="C"> C) 2.5 V</label>
+            <label class="option"><input type="radio" name="gate6" value="D"> D) 0 V</label>
+            <div class="feedback" id="fb-gate6"></div>
+        </div>
+        <div class="quiz-question">
+            <p>7. (Difficult) In a first‑order RC LPF, at f = 10 f<sub>c</sub>, the approximate attenuation is:</p>
+            <label class="option"><input type="radio" name="gate7" value="A"> A) −10 dB</label>
+            <label class="option"><input type="radio" name="gate7" value="B"> B) −20 dB</label>
+            <label class="option"><input type="radio" name="gate7" value="C"> C) −40 dB</label>
+            <label class="option"><input type="radio" name="gate7" value="D"> D) −6 dB</label>
+            <div class="feedback" id="fb-gate7"></div>
+        </div>
+        <div class="quiz-question">
+            <p>8. (Moderate) The transfer function of an RC LPF is H(s)=1/(1+sRC). The pole is at:</p>
+            <label class="option"><input type="radio" name="gate8" value="A"> A) s = −RC</label>
+            <label class="option"><input type="radio" name="gate8" value="B"> B) s = −1/(RC)</label>
+            <label class="option"><input type="radio" name="gate8" value="C"> C) s = +1/(RC)</label>
+            <label class="option"><input type="radio" name="gate8" value="D"> D) s = 0</label>
+            <div class="feedback" id="fb-gate8"></div>
+        </div>
+        <div class="quiz-question">
+            <p>9. (Easy) An integrator can be built using an op‑amp with:</p>
+            <label class="option"><input type="radio" name="gate9" value="A"> A) resistor in feedback</label>
+            <label class="option"><input type="radio" name="gate9" value="B"> B) capacitor in feedback</label>
+            <label class="option"><input type="radio" name="gate9" value="C"> C) inductor in feedback</label>
+            <label class="option"><input type="radio" name="gate9" value="D"> D) diode in feedback</label>
+            <div class="feedback" id="fb-gate9"></div>
+        </div>
+        <div class="quiz-question">
+            <p>10. (Difficult) A sensor output has a DC offset and high‑frequency noise. Which filter is most suitable to extract the slow‑varying signal?</p>
+            <label class="option"><input type="radio" name="gate10" value="A"> A) High pass</label>
+            <label class="option"><input type="radio" name="gate10" value="B"> B) Low pass</label>
+            <label class="option"><input type="radio" name="gate10" value="C"> C) Band pass</label>
+            <label class="option"><input type="radio" name="gate10" value="D"> D) Band stop</label>
+            <div class="feedback" id="fb-gate10"></div>
+        </div>
+
+        <button class="btn" id="checkGateBtn">Check GATE Answers</button>
+        <button class="btn reset" id="resetGateBtn">Reset GATE</button>
+        <div id="gateScore" class="score-box"></div>
+    </section>
+
+    <!-- ========== 8. INTERVIEW PREP ========== -->
+    <section id="interview">
+        <h2>8. Core Electronics Company Interview Preparation</h2>
+        <details>
+            <summary>Q1. Why is a capacitor used in a low pass filter and not an inductor?</summary>
+            <p><strong>Answer:</strong> Capacitors are smaller, cheaper, and more ideal at low frequencies. Inductors are bulkier, have series resistance, and can cause EMI. For RC filters, the capacitor’s impedance decreases with frequency, providing a simple shunt path to ground.</p>
+        </details>
+        <details>
+            <summary>Q2. How would you design an anti‑aliasing filter for an ADC sampling at 10 kSps?</summary>
+            <p><strong>Answer:</strong> Set the cut‑off frequency below half the sampling rate (Nyquist), e.g., f<sub>c</sub> ≈ 4–5 kHz. Choose R and C to achieve that f<sub>c</sub>, and ensure the filter attenuates frequencies above Nyquist sufficiently (e.g., −40 dB). Often a higher‑order filter is needed.</p>
+        </details>
+        <details>
+            <summary>Q3. What is the effect of loading on an RC LPF?</summary>
+            <p><strong>Answer:</strong> If a load resistance is connected across C, it forms a parallel combination and alters the effective cut‑off frequency and DC gain. The output impedance of the source also adds to R. Always buffer with an op‑amp if needed.</p>
+        </details>
+        <details>
+            <summary>Q4. Explain the step response of an RC LPF.</summary>
+            <p><strong>Answer:</strong> It is an exponential rise: v<sub>out</sub>(t)=V<sub>in</sub>(1−e<sup>−t/τ</sup>). The 10–90% rise time ≈ 2.2τ. This is critical for sensor interface timing.</p>
+        </details>
+        <details>
+            <summary>Q5. How does a low pass filter reduce noise in embedded systems?</summary>
+            <p><strong>Answer:</strong> It attenuates high‑frequency noise (e.g., from switching regulators or digital clocks) that couples into analog signal lines. Placed close to the ADC input, it prevents aliasing and improves SNR.</p>
+        </details>
+        <details>
+            <summary>Q6. What is the difference between active and passive low pass filters?</summary>
+            <p><strong>Answer:</strong> Passive uses only R, L, C; no power, but cannot provide gain and suffers from loading. Active uses op‑amps, provides gain, buffering, and allows higher Q without inductors.</p>
+        </details>
+        <details>
+            <summary>Q7. How would you measure the cut‑off frequency in the lab?</summary>
+            <p><strong>Answer:</strong> Apply a sine sweep and measure the output amplitude. Find the frequency where output is 0.707×V<sub>in</sub> (or −3 dB). Use an oscilloscope or network analyser.</p>
+        </details>
+        <details>
+            <summary>Q8. What is the phase shift at f<sub>c</sub> and why does it matter?</summary>
+            <p><strong>Answer:</strong> −45°. It matters in feedback loops and communication systems because phase delay can affect stability and signal integrity.</p>
+        </details>
+        <details>
+            <summary>Q9. How does temperature affect an RC LPF?</summary>
+            <p><strong>Answer:</strong> Resistor and capacitor values drift with temperature (temperature coefficient). This shifts f<sub>c</sub>. Use precision components (C0G, metal film) for critical applications.</p>
+        </details>
+        <details>
+            <summary>Q10. What is a common mistake when simulating an RC LPF in Multisim?</summary>
+            <p><strong>Answer:</strong> Forgetting to set the AC analysis correctly, or not adding a ground reference. Also, ideal components may hide real‑world parasitic effects.</p>
+        </details>
+        <p style="margin-top:16px;"><strong>Industry perspective:</strong> Low pass filters are used in every mixed‑signal IC, sensor interface, and power supply. Engineers must balance cut‑off, roll‑off, cost, and board space.</p>
+    </section>
+
+    <!-- ========== 9. APPLICATIONS ========== -->
+    <section id="applications">
+        <h2>9. Applications &amp; Industry Relevance</h2>
+        <div class="card">
+            <ul>
+                <li><strong>Anti‑aliasing filters</strong> before ADC in embedded systems.</li>
+                <li><strong>Noise reduction</strong> in audio, sensor, and instrumentation amplifiers.</li>
+                <li><strong>Power supply filtering</strong> to smooth rectified AC.</li>
+                <li><strong>Demodulation</strong> in communication receivers.</li>
+                <li><strong>Button debouncing</strong> in digital interfaces.</li>
+            </ul>
+            <p><strong>Challenges:</strong> Component tolerance, parasitic effects, and loading. <strong>Career relevance:</strong> Analog design, embedded hardware, validation engineer.</p>
+        </div>
+    </section>
+
+    <!-- ========== 10. INTERACTIVE QUIZ ========== -->
+    <section id="quiz">
+        <h2>10. Interactive Topic Quiz</h2>
+        <p>Attempt all 10 questions. Click "Check Answers" for instant feedback.</p>
+
+        <div id="quiz-container">
+            <!-- questions injected via JS -->
+        </div>
+        <button class="btn" id="checkQuizBtn">Check Answers</button>
+        <button class="btn reset" id="resetQuizBtn">Reset Quiz</button>
+        <div id="quizScore" class="score-box"></div>
+    </section>
+
+    <!-- ========== 11. REVISION MATERIALS ========== -->
+    <section id="revision">
+        <h2>11. Revision Materials</h2>
+        <div class="card">
+            <h3>Formula Sheet</h3>
+            <table>
+                <tr><th>Parameter</th><th>Formula</th></tr>
+                <tr><td>Cut‑off frequency</td><td>f<sub>c</sub> = 1/(2πRC)</td></tr>
+                <tr><td>Time constant</td><td>τ = RC</td></tr>
+                <tr><td>Transfer function</td><td>H(s)=1/(1+sRC)</td></tr>
+                <tr><td>Magnitude</td><td>|H(jω)| = 1/√(1+(ωRC)²)</td></tr>
+                <tr><td>Phase</td><td>∠H = −tan<sup>−1</sup>(ωRC)</td></tr>
+                <tr><td>Roll‑off</td><td>−20 dB/decade</td></tr>
+            </table>
+            <h3>Quick Revision Points</h3>
+            <ul>
+                <li>At f = f<sub>c</sub>, gain = 0.707, phase = −45°.</li>
+                <li>Passband: f ≪ f<sub>c</sub> → gain ≈ 1 (0 dB).</li>
+                <li>Stopband: f ≫ f<sub>c</sub> → gain decreases by 20 dB/decade.</li>
+                <li>Used for anti‑aliasing, noise reduction, and smoothing.</li>
+                <li>Active filters overcome loading and provide gain.</li>
+            </ul>
+            <h3>Common errors</h3>
+            <ul>
+                <li>Confusing cut‑off with unity gain frequency.</li>
+                <li>Ignoring source/load impedance.</li>
+                <li>Forgetting that capacitor blocks DC only in steady state.</li>
+            </ul>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2025 ECE Learning · Low Pass Filter · Embedded Systems Development · Academic use</p>
+    </footer>
+</div>
+
+<script>
+    // ==================== GATE MCQ FEEDBACK ====================
+    const gateAnswers = {
+        gate1: 'B', gate2: 'C', gate3: 'A', gate4: 'D', gate5: 'C',
+        gate6: 'B', gate7: 'B', gate8: 'B', gate9: 'B', gate10: 'B'
+    };
+
+    document.getElementById('checkGateBtn').addEventListener('click', function() {
+        let score = 0;
+        for (let i=1; i<=10; i++) {
+            const name = 'gate'+i;
+            const radios = document.getElementsByName(name);
+            let selected = null;
+            for (let r of radios) { if (r.checked) selected = r.value; }
+            const fb = document.getElementById('fb-'+name);
+            if (selected === gateAnswers[name]) {
+                fb.className = 'feedback correct-fb';
+                fb.textContent = '✔ Correct!';
+                score++;
+            } else if (selected) {
+                fb.className = 'feedback wrong-fb';
+                fb.textContent = '✘ Incorrect. Correct answer: ' + gateAnswers[name];
+            } else {
+                fb.className = 'feedback unanswered-fb';
+                fb.textContent = '⚠ Not answered. Correct answer: ' + gateAnswers[name];
+            }
+        }
+        document.getElementById('gateScore').textContent = `GATE Score: ${score}/10 (${score*10}%)`;
+    });
+
+    document.getElementById('resetGateBtn').addEventListener('click', function() {
+        for (let i=1; i<=10; i++) {
+            const name = 'gate'+i;
+            const radios = document.getElementsByName(name);
+            for (let r of radios) r.checked = false;
+            document.getElementById('fb-'+name).textContent = '';
+            document.getElementById('fb-'+name).className = 'feedback';
+        }
+        document.getElementById('gateScore').textContent = '';
+    });
+
+    // ==================== INTERACTIVE QUIZ ====================
+    const quizData = [
+        { q: "What is the cut‑off frequency of an RC low pass filter with R=10 kΩ, C=10 nF?", 
+          opts: ["1.59 kHz", "15.9 kHz", "159 Hz", "1.59 MHz"], ans: 0 },
+        { q: "At the cut‑off frequency, the phase shift of an RC LPF is:", 
+          opts: ["0°", "−45°", "−90°", "−180°"], ans: 1 },
+        { q: "The roll‑off of a first‑order low pass filter is approximately:", 
+          opts: ["−20 dB/decade", "−40 dB/decade", "−6 dB/octave", "−10 dB/decade"], ans: 0 },
+        { q: "Which component determines the cut‑off frequency together with R?", 
+          opts: ["Inductor", "Capacitor", "Diode", "Transistor"], ans: 1 },
+        { q: "At DC, the output of an RC LPF is:", 
+          opts: ["Zero", "Equal to input", "0.707 times input", "Infinite"], ans: 1 },
+        { q: "If R is doubled and C is halved, f<sub>c</sub> will:", 
+          opts: ["Double", "Halve", "Remain same", "Quadruple"], ans: 2 },
+        { q: "The transfer function of an RC LPF is:", 
+          opts: ["1/(1+sRC)", "sRC/(1+sRC)", "1/(sRC)", "sRC"], ans: 0 },
+        { q: "Which application uses a low pass filter?", 
+          opts: ["Anti‑aliasing", "Differentiation", "High‑frequency boost", "Clipping"], ans: 0 },
+        { q: "At f = 10 f<sub>c</sub>, the attenuation is about:", 
+          opts: ["−3 dB", "−10 dB", "−20 dB", "−40 dB"], ans: 2 },
+        { q: "The time constant of an RC LPF is:", 
+          opts: ["R/C", "RC", "1/RC", "C/R"], ans: 1 }
+    ];
+
+    function buildQuiz() {
+        const container = document.getElementById('quiz-container');
+        container.innerHTML = '';
+        quizData.forEach((item, idx) => {
+            const div = document.createElement('div');
+            div.className = 'quiz-question';
+            div.innerHTML = `<p>${idx+1}. ${item.q}</p>`;
+            item.opts.forEach((opt, oi) => {
+                const label = document.createElement('label');
+                label.className = 'option';
+                label.innerHTML = `<input type="radio" name="quiz${idx}" value="${oi}"> ${opt}`;
+                div.appendChild(label);
+            });
+            const fb = document.createElement('div');
+            fb.className = 'feedback';
+            fb.id = `quizfb-${idx}`;
+            div.appendChild(fb);
+            container.appendChild(div);
+        });
+    }
+    buildQuiz();
+
+    document.getElementById('checkQuizBtn').addEventListener('click', function() {
+        let score = 0;
+        quizData.forEach((item, idx) => {
+            const radios = document.getElementsByName(`quiz${idx}`);
+            let selected = null;
+            for (let r of radios) if (r.checked) selected = r.value;
+            const fb = document.getElementById(`quizfb-${idx}`);
+            if (selected !== null) {
+                if (parseInt(selected) === item.ans) {
+                    fb.className = 'feedback correct-fb';
+                    fb.textContent = '✔ Correct!';
+                    score++;
+                } else {
+                    fb.className = 'feedback wrong-fb';
+                    fb.textContent = `✘ Incorrect. Correct answer: ${item.opts[item.ans]}`;
+                }
+            } else {
+                fb.className = 'feedback unanswered-fb';
+                fb.textContent = `⚠ Not answered. Correct answer: ${item.opts[item.ans]}`;
+            }
+        });
+        const percent = (score / quizData.length * 100).toFixed(1);
+        document.getElementById('quizScore').textContent = `Quiz Score: ${score}/10 (${percent}%)`;
+    });
+
+    document.getElementById('resetQuizBtn').addEventListener('click', function() {
+        quizData.forEach((_, idx) => {
+            const radios = document.getElementsByName(`quiz${idx}`);
+            for (let r of radios) r.checked = false;
+            const fb = document.getElementById(`quizfb-${idx}`);
+            fb.textContent = '';
+            fb.className = 'feedback';
+        });
+        document.getElementById('quizScore').textContent = '';
+    });
+
+    // smooth nav scroll (no external lib)
+    document.querySelectorAll('nav a').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+</script>
+</body>
+</html>
